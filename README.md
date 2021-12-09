@@ -9,3 +9,4 @@ https://trello.com/b/TCr0Nfo3/we-r-4
 Martin Härmälä
 Jessica Suarez
 Salamon Donat
+Ricky Berglund
