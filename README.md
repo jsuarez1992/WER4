@@ -6,3 +6,4 @@ You need to have SQLite and .NET 5.0 for this.
 
 Martin Härmälä
 Jessica Suarez
+Salamon Donat
