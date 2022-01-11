@@ -4,12 +4,13 @@ A simple template for a console application with SQLite database.
 
 You need to have SQLite and .NET 5.0 for this.
 
-https://trello.com/b/TCr0Nfo3/we-r-4
+https://trello.com/b/TCr0Nfo3/we-r-5
 
 Martin Härmälä
 Jessica Suarez
 Salamon Donat
 Ricky Berglund
+Oscar Bjolin
 
 Our project will be implementing the “Kanban” structure as a methodology. We had in consideration other methodologies for implementation, but Kanban is a methodology that maximizes efficiency. 
 Also, with Kanban you can visualize your tasks more easily, and you can improve your software continuously. 
