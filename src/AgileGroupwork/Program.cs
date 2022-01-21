@@ -16,32 +16,43 @@ namespace Groupwork
             string scoreInput = "";
             int insertScore = 0;
             string currentUser = "";
-            
+
+
+            // database creation commands
+            string sql = "CREATE TABLE Scoreboard (name TEXT, score INTEGER, category TEXT, user TEXT)";
+            SQLiteConnection m_dbConnection = new SQLiteConnection("Data Source=MyDatabase.sqlite;Version=3;");
+            string sqluser = "CREATE TABLE User (user TEXT, password TEXT)";
+            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            SQLiteCommand commanduser = new SQLiteCommand(sqluser, m_dbConnection);
             
             // find another solution that doesnt destroy the database
-            if (File.Exists("MyDatabase.sqlite"))
+            if (!File.Exists("MyDatabase.sqlite"))
             {
-                File.Delete("MyDatabase.sqlite");
+                SQLiteConnection.CreateFile("MyDatabase.sqlite");
+                
+                m_dbConnection.Open();
+                
+            
+                
+                commanduser.ExecuteNonQuery();
+                
+            
+                
+                command.ExecuteNonQuery();
             }
-            SQLiteConnection.CreateFile("MyDatabase.sqlite");
+           else
+           {
+               m_dbConnection.Open();
+           }
             
 
             // Open a database connection
-            SQLiteConnection m_dbConnection = new SQLiteConnection("Data Source=MyDatabase.sqlite;Version=3;");
-            m_dbConnection.Open();
-
-
-
-            string sqluser = "CREATE TABLE User (user TEXT, password TEXT)";
             
-            SQLiteCommand commanduser = new SQLiteCommand(sqluser, m_dbConnection);
-            commanduser.ExecuteNonQuery();
-
-            // Create tables
-            string sql = "CREATE TABLE Scoreboard (name TEXT, score INTEGER, category TEXT, user TEXT)";
             
-            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-            command.ExecuteNonQuery();
+
+
+
+            
 
             //Log in part
             while (true)
