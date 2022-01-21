@@ -29,15 +29,8 @@ namespace Groupwork
             if (!File.Exists("MyDatabase.sqlite"))
             {
                 SQLiteConnection.CreateFile("MyDatabase.sqlite");
-                
                 m_dbConnection.Open();
-                
-            
-                
                 commanduser.ExecuteNonQuery();
-                
-            
-                
                 command.ExecuteNonQuery();
             }
            else
@@ -119,12 +112,13 @@ namespace Groupwork
             while (true)
             {
                 Console.WriteLine("Show all the scores (Press 1)");
-                Console.WriteLine("Add a score for a person (Press 2)");
+                Console.WriteLine("Add or edit a score for a person (Press 2)");
                 Console.WriteLine("Show a person's score (Press 3)");
-                Console.WriteLine("Quit (Press 4)");
+                Console.WriteLine("Delete a person's score (Press 4)");
+                Console.WriteLine("Quit (Press 5)");
                 input = Console.ReadLine();
 
-                if (input == "4")
+                if (input == "5")
                 {
                     break;
                 }
@@ -177,6 +171,25 @@ namespace Groupwork
                     reader.Read();
                     Console.WriteLine(reader["score"]);
                     Console.WriteLine();
+                }
+                else if (input == "4")
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Give me a name");
+                    string personName = Console.ReadLine();
+                    string datasUserPerson = String.Format("Select score from Scoreboard where name='{0}'", personName);
+                    //string sqluser = "CREATE TABLE User (user TEXT, password TEXT)";
+                    string cUser=String.Format("Select user from Scoreboard where name='{0}'",datasUserPerson);
+                    if(cUser==currentUser)
+                    {
+                        string deleteCommand= String.Format("DELETE FROM Scoreboard WHERE name='{0}'",personName);
+                        command = new SQLiteCommand(deleteCommand, m_dbConnection);
+                        command.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Your user do not have permission to change the database");
+                    }
                 }
                 else
                 {
