@@ -8,196 +8,230 @@ namespace Groupwork
     public class Program
     {
         public static void Main(string[] args)
-        {
-            //add password encryption 
+        { 
+            // commands used to make program work
             string input = "";
-            string userInput = "";
+            string programQuit = "ok";
             string insertName = "";
-            string scoreInput = "";
+            string scoreInput = "1";
             int insertScore = 0;
             string currentUser = "";
+            string categoryInput = "";
 
-
-            // database creation commands
+            // these lines create a database incase there isn't one before
             string sql = "CREATE TABLE Scoreboard (name TEXT, score INTEGER, category TEXT, user TEXT)";
             SQLiteConnection m_dbConnection = new SQLiteConnection("Data Source=MyDatabase.sqlite;Version=3;");
             string sqluser = "CREATE TABLE User (user TEXT, password TEXT)";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
             SQLiteCommand commanduser = new SQLiteCommand(sqluser, m_dbConnection);
-            
-            // find another solution that doesnt destroy the database
             if (!File.Exists("MyDatabase.sqlite"))
             {
                 SQLiteConnection.CreateFile("MyDatabase.sqlite");
+
                 m_dbConnection.Open();
                 commanduser.ExecuteNonQuery();
                 command.ExecuteNonQuery();
             }
-           else
-           {
-               m_dbConnection.Open();
-           }
-            
-
-            // Open a database connection
-            
-            
-
-
-
-            
-
-            //Log in part
-            while (true)
+            else
             {
-                Console.WriteLine("Log in! (Press 1)");
-                Console.WriteLine("Create user! (Press 2)");
-                Console.WriteLine("Quit! (Press 3)");
-                userInput = Console.ReadLine();
+                m_dbConnection.Open();
+            }
 
-                if (userInput == "3")
+            //User logs in, if username doesn't exist you can create a new user
+            bool login = true;
+            while (login)
+            {
+                string sqlLogin = "";
+                string userPassword = "";
+                string tempUser = "";
+                Console.WriteLine("Enter your username:");
+                string userId = Console.ReadLine();
+                Console.WriteLine();
+                Console.WriteLine("Enter your password");
+                userPassword = Console.ReadLine();
+                sqlLogin = String.Format("Select user,password from User where user='{0}'", userId);
+                command = new SQLiteCommand(sqlLogin, m_dbConnection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                reader.Read();
+                try
                 {
-                    break;
-                }
-                else if (userInput == "1")
-                {
-                    // work in progress , comment section out if want to test run
-                    /*Console.WriteLine();
-                    Console.WriteLine("Enter your username");
-                    string userId = Console.ReadLine();
-                    string sqlLogin = String.Format("Select user from User where user='{0}'", userId);
-                    commanduser = new SQLiteCommand(sqlLogin, m_dbConnection);
-                    SQLiteDataReader userReader = commanduser.ExecuteReader();
-                    userReader.Read();
-                    Console.WriteLine(userReader["user"]);
-                    Console.WriteLine(); */
-                }
-                else if (userInput == "2")
-                {
-                    
-                    Console.WriteLine();
-                    Console.WriteLine("Enter your username:");
-                    string userName = Console.ReadLine();
-                    currentUser = userName;
-                    Console.WriteLine("Make a password");
-                    string passWord = Console.ReadLine();
-                    Console.WriteLine();
-
-                    try
+                    if (userId == userPassword)
                     {
-                        string sqlusername = String.Format("INSERT INTO User (user, password) VALUES ('{0}', '{1}')", userName, passWord);
-                        commanduser = new SQLiteCommand(sqlusername, m_dbConnection);
-                        commanduser.ExecuteNonQuery();
-                        Console.WriteLine("User created!");
-                        Console.WriteLine();
-                        break;
+                        Console.WriteLine("Silly, username can't be the same as password!");
+                    }
+                    tempUser = Convert.ToString(reader["user"]);
+                    string tempPassword = Convert.ToString(reader["password"]);
+                    if (tempPassword == userPassword)
+                    {
+                        login = false;
+                        currentUser = tempUser;
+                    }
+                        
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
+                        string message = "User not found!";
+                        Exception e2 = (Exception)Activator.CreateInstance(e.GetType(), message, e);
+                        Console.WriteLine(e2.Message);
                         Console.WriteLine();
+                        Console.WriteLine("Do you want to create a user? Write yes if you want to");
+                        string userDoesntExist = Console.ReadLine();
+                        if (userDoesntExist == "yes")
+                        {
+                            Console.WriteLine();
+                            string sqlusername = String.Format("INSERT INTO User (user, password) VALUES ('{0}', '{1}')", userId, userPassword);
+                            commanduser = new SQLiteCommand(sqlusername, m_dbConnection);
+                            commanduser.ExecuteNonQuery();
+                            Console.WriteLine("User created!");
+                            break;
+                        }
+                        else
+                        {
+                            programQuit="quit";
+                            break;
+                        }
                     }
                 }
-                else
-                {
-                    Console.WriteLine("You wrote an incorrect input");
-                    Console.WriteLine();
-                }
-            }
-            
-
-            
 
             //The main program starts
-            while (true)
+            if (programQuit != "quit")
             {
-                Console.WriteLine("Show all the scores (Press 1)");
-                Console.WriteLine("Add or edit a score for a person (Press 2)");
-                Console.WriteLine("Show a person's score (Press 3)");
-                Console.WriteLine("Delete a person's score (Press 4)");
-                Console.WriteLine("Quit (Press 5)");
-                input = Console.ReadLine();
+                while (true)
+                {
+                    Console.WriteLine("Show all the scores (Press 1)");
+                    Console.WriteLine("Add a score for a person (Press 2)");
+                    Console.WriteLine("Show a person's score (Press 3)");
+                    Console.WriteLine("Delete a person's score (Press 4)");
+                    Console.WriteLine("Change a person's score (Press 5)");
+                    Console.WriteLine("Quit (Press 6)");
+                    input = Console.ReadLine();
 
-                if (input == "5")
-                {
-                    break;
-                }
-                else if (input == "1")
-                {
-                    Console.WriteLine();
-                    string sqlCommand = "Select name, score, category from Scoreboard";
-                    command = new SQLiteCommand(sqlCommand, m_dbConnection);
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    if (input == "6")
                     {
+                        break;
+                    }
+                    else if (input == "1")
+                    {
+                        Console.WriteLine();
+                        string sqlCommand = "Select name, score, category from Scoreboard";
+                        command = new SQLiteCommand(sqlCommand, m_dbConnection);
+                        SQLiteDataReader reader = command.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            Console.WriteLine("Name: " + reader["name"] + " Score: " + reader["score"] + " Category: " + reader["category"]);
+                        }
+                        Console.WriteLine();
+
+                    }
+                    else if (input == "2")
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Give a name to the person");
+                        insertName = Console.ReadLine();
+                        Console.WriteLine("Give a score to that person");
+                        scoreInput = Console.ReadLine();
+                        Console.WriteLine("Enter category");
+                        categoryInput = Console.ReadLine();
+                        Console.WriteLine();
+                        try
+                        {
+                            insertScore = Convert.ToInt32(scoreInput);
+                            sql = String.Format("INSERT INTO Scoreboard (name, score, category, user) VALUES ('{0}', '{1}','{2}','{3}')", insertName, insertScore, categoryInput, currentUser);
+                            command = new SQLiteCommand(sql, m_dbConnection);
+                            command.ExecuteNonQuery();
+                            Console.WriteLine();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                            Console.WriteLine();
+                        }
+                    }
+                    else if (input == "3")
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Give me a name");
+                        string personName = Console.ReadLine();
+                        string sqlCommand = String.Format("Select name, score, category from Scoreboard where name='{0}'", personName);
+                        command = new SQLiteCommand(sqlCommand, m_dbConnection);
+                        SQLiteDataReader reader = command.ExecuteReader();
+                        reader.Read();
                         Console.WriteLine("Name: " + reader["name"] + " Score: " + reader["score"] + " Category: " + reader["category"]);
-                    }
-                    Console.WriteLine();
-
-                }
-                else if (input == "2")
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("Give a name to the person");
-                    insertName = Console.ReadLine();
-                    Console.WriteLine("Give a score to that person");
-                    scoreInput = Console.ReadLine();
-                    Console.WriteLine("Enter category");
-                    string categoryInput = Console.ReadLine();
-                    Console.WriteLine();
-                    try
-                    {
-                        // find away to add currentUser into the scoreboard
-                        insertScore = Convert.ToInt32(scoreInput);
-                        sql = String.Format("INSERT INTO Scoreboard (name, score, category, user) VALUES ('{0}', '{1}','{2}','{3}')", insertName, insertScore, categoryInput, currentUser);
-                        command = new SQLiteCommand(sql, m_dbConnection);
-                        command.ExecuteNonQuery();
                         Console.WriteLine();
                     }
-                    catch (Exception e)
+                    else if (input == "4")
                     {
-                        Console.WriteLine(e.Message);
                         Console.WriteLine();
+                        Console.WriteLine("Give me a name");
+                        string personName = Console.ReadLine();
+                        string datasUserPerson = String.Format("Select name,user,score from Scoreboard where name='{0}'", personName);
+                        command = new SQLiteCommand(datasUserPerson, m_dbConnection);
+                        SQLiteDataReader reader = command.ExecuteReader();
+                        reader.Read();
+                        int personSCore=Convert.ToInt32(reader["score"]);
+                        string cUser = String.Format("Select user,name from Scoreboard where name='{0}'", reader["name"]);
+                        command = new SQLiteCommand(cUser, m_dbConnection);
+                        SQLiteDataReader secondReader = command.ExecuteReader();
+                        secondReader.Read();     
+                        string personsUser = Convert.ToString(secondReader["user"]);
+                        if (personsUser == currentUser)
+                        {
+                            string deleteCommand = String.Format("DELETE FROM Scoreboard WHERE name='{0}'and score='{1}'", personName,personSCore);
+                            command = new SQLiteCommand(deleteCommand, m_dbConnection);
+                            command.ExecuteNonQuery();
+                            Console.WriteLine();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Your user do not have permission to change the database");
+                        }
                     }
-                }
-                else if (input == "3")
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("Give me a name");
-                    string personName = Console.ReadLine();
-                    string sqlCommand = String.Format("Select score from Scoreboard where name='{0}'", personName);
-                    command = new SQLiteCommand(sqlCommand, m_dbConnection);
-                    SQLiteDataReader reader = command.ExecuteReader();
-                    reader.Read();
-                    Console.WriteLine(reader["score"]);
-                    Console.WriteLine();
-                }
-                else if (input == "4")
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("Give me a name");
-                    string personName = Console.ReadLine();
-                    string datasUserPerson = String.Format("Select score from Scoreboard where name='{0}'", personName);
-                    //string sqluser = "CREATE TABLE User (user TEXT, password TEXT)";
-                    string cUser=String.Format("Select user from Scoreboard where name='{0}'",datasUserPerson);
-                    if(cUser==currentUser)
+                    else if (input == "5")
                     {
-                        string deleteCommand= String.Format("DELETE FROM Scoreboard WHERE name='{0}'",personName);
-                        command = new SQLiteCommand(deleteCommand, m_dbConnection);
-                        command.ExecuteNonQuery();
+                        string personsName = "";
+                        string newScoreInput = "";
+                        string datasUserPerson = "";
+                        int newScore = 0;
+                        Console.WriteLine();
+                        Console.WriteLine("Give a person's name");
+                        personsName = Console.ReadLine();
+                        try
+                        {
+                            datasUserPerson = String.Format("Select score from Scoreboard where name='{0}'", personsName);
+                            command = new SQLiteCommand(datasUserPerson, m_dbConnection);
+                            SQLiteDataReader reader = command.ExecuteReader();
+                            reader.Read();
+                            Console.WriteLine("Current score: " + reader["score"]);
+                            Console.WriteLine();
+                            Console.WriteLine("Give a new value of the score");
+                            newScoreInput = Console.ReadLine();
+                            newScore = Convert.ToInt32(newScoreInput);
+                            datasUserPerson = String.Format("UPDATE Scoreboard SET score='{0}' where name ='{1}'", newScoreInput, personsName);
+                            command = new SQLiteCommand(datasUserPerson, m_dbConnection);
+                            command.ExecuteNonQuery();
+                            Console.WriteLine("It is updated");
+                            Console.WriteLine();
+                        }
+                        catch (Exception e)
+                        {
+                            string message = "Incorrect input";
+                            Exception e2 = (Exception)Activator.CreateInstance(e.GetType(), message, e);
+                            Console.WriteLine(e2.Message);
+                            Console.WriteLine();
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("Your user do not have permission to change the database");
+                        Console.WriteLine("You wrote an incorrect input");
+                        Console.WriteLine();
                     }
                 }
-                else
-                {
-                    Console.WriteLine("You wrote an incorrect input");
-                    Console.WriteLine();
-                }
+                m_dbConnection.Close();
             }
-            m_dbConnection.Close();
+            else
+            {
+                return;
+            }
         }
     }
 }
